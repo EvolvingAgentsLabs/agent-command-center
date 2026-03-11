@@ -1,0 +1,13 @@
+{
+  "name": "agent-command-center",
+  "owner": {
+    "name": "Evolving Agents Labs"
+  },
+  "plugins": [
+    {
+      "name": "acc",
+      "source": "./agent-command-center",
+      "description": "Agent Command Center - Manage teams of parallel Claude Code agents via tmux. Launch, monitor, auto-nudge idle agents, view dashboards with token usage and progress."
+    }
+  ]
+}
