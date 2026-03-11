@@ -1,0 +1,19 @@
+{
+  "name": "acc",
+  "description": "Agent Command Center - Manage teams of parallel Claude Code agents via tmux. Launch, monitor, auto-nudge idle agents, view dashboards with token usage and progress. Inspired by Karpathy's vision of an Agent Command Center IDE.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Agent Command Center Contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/agent-command-center/acc",
+  "keywords": [
+    "agents",
+    "tmux",
+    "parallel",
+    "multi-agent",
+    "command-center",
+    "dashboard",
+    "monitoring"
+  ]
+}
