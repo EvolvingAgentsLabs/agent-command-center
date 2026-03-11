@@ -7,25 +7,20 @@ Inspired by [Andrej Karpathy's call](https://x.com/karpathy) for a proper "Agent
 > *"tmux grids are awesome, but I feel a need to have a proper 'agent command center' IDE for teams of them... I want to see/hide toggle them, see if any are idle, pop open related tools, stats (usage), etc."*
 > — Andrej Karpathy
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║                     AGENT COMMAND CENTER                        ║
-╠══════════════════════════════════════════════════════════════════╣
-║  Session: acc    Agents: 4    Active: 2   Idle: 1   Blocked: 1 ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  [1] api-refactor (0.0)                      ● ACTIVE  [34m]   ║
-║      Task: Refactor API endpoints to async/await                 ║
-║                                                                  ║
-║  [2] test-writer (0.1)                       ● ACTIVE  [12m]   ║
-║      Task: Write tests for utils module                          ║
-║                                                                  ║
-║  [3] bug-fix (1.0)                           ○ IDLE    [45m]   ║
-║      Task: Fix auth bug                                          ║
-║                                                                  ║
-║  [4] docs (1.1)                              ◉ BLOCKED [8m]    ║
-║      Task: Update API documentation                              ║
-╚══════════════════════════════════════════════════════════════════╝
+```mermaid
+graph TD
+    HEADER["AGENT COMMAND CENTER\nSession: acc | Agents: 4 | Active: 2 | Idle: 1 | Blocked: 1"]
+
+    HEADER --- a1["api-refactor\nACTIVE - 34m\nRefactor API endpoints"]
+    HEADER --- a2["test-writer\nACTIVE - 12m\nWrite tests for utils"]
+    HEADER --- a3["bug-fix\nIDLE - 45m\nFix auth bug"]
+    HEADER --- a4["docs\nBLOCKED - 8m\nUpdate API docs"]
+
+    style HEADER fill:#1a1a2e,stroke:#e94560,color:#fff
+    style a1 fill:#2ecc71,stroke:#27ae60,color:#fff
+    style a2 fill:#2ecc71,stroke:#27ae60,color:#fff
+    style a3 fill:#f39c12,stroke:#e67e22,color:#fff
+    style a4 fill:#e74c3c,stroke:#c0392b,color:#fff
 ```
 
 ---
@@ -52,26 +47,26 @@ Inspired by [Andrej Karpathy's call](https://x.com/karpathy) for a proper "Agent
 
 ```mermaid
 graph TB
-    User["<b>You</b><br/>Claude Code session"]
+    User["You - Claude Code session"]
 
     subgraph ACC ["Agent Command Center Plugin"]
-        CMD["Slash Commands<br/>/acc:launch, /acc:status, ..."]
-        SKILL["Agent Monitor Skill<br/>(model-invoked)"]
-        SCRIPTS["Shell Daemons<br/>watcher.sh, fullauto.sh"]
+        CMD["Slash Commands"]
+        SKILL["Agent Monitor Skill"]
+        SCRIPTS["Shell Daemons"]
     end
 
-    subgraph TMUX ["tmux session: acc"]
+    subgraph TMUX ["tmux session - acc"]
         direction LR
-        P1["Window 0<br/><b>api-refactor</b><br/>● ACTIVE"]
-        P2["Window 1<br/><b>test-writer</b><br/>● ACTIVE"]
-        P3["Window 2<br/><b>bug-fix</b><br/>○ IDLE"]
-        P4["Window 3<br/><b>docs</b><br/>◉ BLOCKED"]
-        PW["Window 4<br/><b>watcher</b><br/>daemon"]
+        P1["api-refactor\nACTIVE"]
+        P2["test-writer\nACTIVE"]
+        P3["bug-fix\nIDLE"]
+        P4["docs\nBLOCKED"]
+        PW["watcher\ndaemon"]
     end
 
-    User -->|"/acc:launch"| CMD
-    CMD -->|"tmux new-window<br/>+ send-keys"| TMUX
-    SCRIPTS -->|"capture-pane<br/>+ send-keys"| TMUX
+    User -->|"acc launch"| CMD
+    CMD -->|"tmux new-window\n+ send-keys"| TMUX
+    SCRIPTS -->|"capture-pane\n+ send-keys"| TMUX
     CMD -->|"capture-pane"| TMUX
     User -->|"asks about agents"| SKILL
     SKILL -->|"checks status"| TMUX
@@ -95,34 +90,34 @@ sequenceDiagram
     participant U as User
     participant CC as Claude Code
     participant ACC as ACC Plugin
-    participant TM as tmux (acc session)
+    participant TM as tmux session
     participant A1 as Agent 1
     participant A2 as Agent 2
 
-    U->>CC: /acc:launch --name api Fix auth bug
+    U->>CC: acc launch --name api Fix auth bug
     CC->>ACC: Execute launch command
-    ACC->>TM: tmux new-window -t acc -n "api"
-    ACC->>TM: tmux send-keys "claude 'Fix auth bug'" Enter
+    ACC->>TM: tmux new-window -n api
+    ACC->>TM: tmux send-keys claude Fix auth bug
     TM->>A1: Starts Claude Code instance
 
-    U->>CC: /acc:launch --name tests Write tests
+    U->>CC: acc launch --name tests Write tests
     CC->>ACC: Execute launch command
-    ACC->>TM: tmux new-window -t acc -n "tests"
-    ACC->>TM: tmux send-keys "claude 'Write tests'" Enter
+    ACC->>TM: tmux new-window -n tests
+    ACC->>TM: tmux send-keys claude Write tests
     TM->>A2: Starts Claude Code instance
 
-    U->>CC: /acc:status
+    U->>CC: acc status
     CC->>ACC: Execute status command
-    ACC->>TM: tmux capture-pane (all panes)
+    ACC->>TM: tmux capture-pane all panes
     TM-->>ACC: Pane output text
-    ACC->>ACC: Classify: ACTIVE / IDLE / BLOCKED
+    ACC->>ACC: Classify ACTIVE or IDLE or BLOCKED
     ACC-->>CC: Formatted status table
     CC-->>U: Display dashboard
 
-    Note over A1: Agent finishes, goes idle
-    U->>CC: /acc:nudge api Keep going
+    Note over A1: Agent finishes and goes idle
+    U->>CC: acc nudge api Keep going
     CC->>ACC: Execute nudge command
-    ACC->>TM: tmux send-keys -t acc:api "Keep going" Enter
+    ACC->>TM: tmux send-keys Keep going
     TM->>A1: Re-prompted
 ```
 
@@ -165,12 +160,12 @@ Before installing ACC, make sure you have:
 
 ```mermaid
 flowchart LR
-    A{"How do you<br/>want to install?"} -->|Personal use| B["<b>Option A</b><br/>Git marketplace"]
-    A -->|Local dev| C["<b>Option B</b><br/>Local clone"]
-    A -->|Testing| D["<b>Option C</b><br/>--plugin-dir"]
-    A -->|Whole team| E["<b>Option D</b><br/>settings.json"]
+    A{"How do you\nwant to install?"} -->|Personal use| B["Option A\nGit marketplace"]
+    A -->|Local dev| C["Option B\nLocal clone"]
+    A -->|Testing| D["Option C\nplugin-dir flag"]
+    A -->|Whole team| E["Option D\nsettings.json"]
 
-    B --> F["Plugin ready"]
+    B --> F["Plugin ready!"]
     C --> F
     D --> F
     E --> F
@@ -412,24 +407,30 @@ Options:
 Every agent follows this state machine. ACC detects transitions by reading tmux pane output.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Launching: /acc:launch
+flowchart TD
+    START(( )) -->|"acc launch"| Launching
 
-    Launching --> Active: Agent starts working
-    Active --> Idle: Task completed or paused
-    Active --> Blocked: Permission prompt
-    Active --> Errored: Error / crash
+    Launching["Launching"]:::launch -->|"Agent starts working"| Active
+    Active["Active"]:::active -->|"Task completed or paused"| Idle
+    Active -->|"Permission prompt"| Blocked
+    Active -->|"Error or crash"| Errored
 
-    Idle --> Active: /acc:nudge or watcher re-prompt
-    Idle --> [*]: /acc:kill
+    Idle["Idle"]:::idle -->|"acc nudge or watcher re-prompt"| Active
+    Idle -->|"acc kill"| END1(( ))
 
-    Blocked --> Active: /acc:approve
-    Blocked --> Active: Fullauto auto-approve
+    Blocked["Blocked"]:::blocked -->|"acc approve"| Active
+    Blocked -->|"Fullauto auto-approve"| Active
 
-    Errored --> Idle: Agent recovers
-    Errored --> [*]: /acc:kill
+    Errored["Errored"]:::errored -->|"Agent recovers"| Idle
+    Errored -->|"acc kill"| END2(( ))
 
-    Active --> [*]: /acc:kill
+    Active -->|"acc kill"| END3(( ))
+
+    classDef launch fill:#3498db,stroke:#2980b9,color:#fff
+    classDef active fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef idle fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef blocked fill:#e74c3c,stroke:#c0392b,color:#fff
+    classDef errored fill:#e74c3c,stroke:#c0392b,color:#fff
 ```
 
 ### Status detection heuristics
@@ -447,19 +448,19 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    START["Daemon starts"] --> CHECK{"Check all<br/>agent panes"}
-    CHECK --> CAPTURE["tmux capture-pane<br/>last 5 lines"]
-    CAPTURE --> DETECT{"Classify<br/>status"}
+    START["Daemon starts"] --> CHECK{"Check all\nagent panes"}
+    CHECK --> CAPTURE["tmux capture-pane\nlast 5 lines"]
+    CAPTURE --> DETECT{"Classify\nstatus"}
 
-    DETECT -->|"ACTIVE"| SKIP["Skip — agent<br/>is working"]
-    DETECT -->|"IDLE"| NUDGE_CHECK{"Nudge<br/>limit?"}
-    DETECT -->|"BLOCKED"| BLOCKED_CHECK{"Fullauto<br/>mode?"}
+    DETECT -->|"ACTIVE"| SKIP["Skip - agent\nis working"]
+    DETECT -->|"IDLE"| NUDGE_CHECK{"Nudge\nlimit?"}
+    DETECT -->|"BLOCKED"| BLOCKED_CHECK{"Fullauto\nmode?"}
 
-    NUDGE_CHECK -->|"Under limit"| SEND["send-keys:<br/>re-prompt"]
-    NUDGE_CHECK -->|"At limit<br/>(watch only)"| STOP_NUDGE["Stop nudging<br/>this agent"]
+    NUDGE_CHECK -->|"Under limit"| SEND["send-keys\nre-prompt"]
+    NUDGE_CHECK -->|"At limit\nwatch only"| STOP_NUDGE["Stop nudging\nthis agent"]
 
-    BLOCKED_CHECK -->|"Yes"| APPROVE["send-keys: y"]
-    BLOCKED_CHECK -->|"No (watch)"| ALERT["Log blocked<br/>agent"]
+    BLOCKED_CHECK -->|"Yes"| APPROVE["send-keys y"]
+    BLOCKED_CHECK -->|"No - watch"| ALERT["Log blocked\nagent"]
 
     SEND --> SLEEP["sleep interval"]
     STOP_NUDGE --> SLEEP
@@ -492,18 +493,18 @@ flowchart TD
 
 ```mermaid
 graph LR
-    YOU["You"] -->|"/acc:launch x15"| ACC["ACC"]
+    YOU["You"] -->|"acc launch x15"| ACC["ACC"]
     ACC --> M1["users module"]
     ACC --> M2["orders module"]
     ACC --> M3["billing module"]
     ACC --> M4["auth module"]
     ACC --> M5["... 11 more"]
 
-    M1 -->|async/await| DONE["All migrated"]
-    M2 -->|async/await| DONE
-    M3 -->|async/await| DONE
-    M4 -->|async/await| DONE
-    M5 -->|async/await| DONE
+    M1 -->|"async/await"| DONE["All migrated"]
+    M2 -->|"async/await"| DONE
+    M3 -->|"async/await"| DONE
+    M4 -->|"async/await"| DONE
+    M5 -->|"async/await"| DONE
 
     style YOU fill:#e94560,stroke:#1a1a2e,color:#fff
     style DONE fill:#2ecc71,stroke:#27ae60,color:#fff
@@ -608,7 +609,7 @@ Set up agents for long-running tasks before you leave:
 graph TD
     ROOT["agent-command-center/"]
 
-    ROOT --> MANIFEST[".claude-plugin/<br/><b>plugin.json</b><br/>name, version, metadata"]
+    ROOT --> MANIFEST[".claude-plugin/\nplugin.json"]
 
     ROOT --> COMMANDS["commands/"]
     COMMANDS --> C1["launch.md"]
@@ -624,7 +625,7 @@ graph TD
     COMMANDS --> C11["kill.md"]
 
     ROOT --> SKILLS["skills/"]
-    SKILLS --> SK1["agent-monitor/<br/><b>SKILL.md</b>"]
+    SKILLS --> SK1["agent-monitor/\nSKILL.md"]
 
     ROOT --> SCRIPTS["scripts/"]
     SCRIPTS --> S1["acc-status.sh"]
@@ -632,7 +633,7 @@ graph TD
     SCRIPTS --> S3["acc-fullauto.sh"]
     SCRIPTS --> S4["acc-dashboard.sh"]
 
-    ROOT --> HOOKS["hooks/<br/><b>hooks.json</b>"]
+    ROOT --> HOOKS["hooks/\nhooks.json"]
 
     style ROOT fill:#1a1a2e,stroke:#e94560,color:#fff
     style MANIFEST fill:#e94560,stroke:#1a1a2e,color:#fff
